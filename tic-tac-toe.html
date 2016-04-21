@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tic-Tac-Toe</title>
+	<style>
+		h1{
+			text-align: center;
+			margin-bottom: 30px;
+		}
+		.board{
+			position: relative;
+			width: 450px;
+			height: 450px;
+			font-size: 50px;
+			margin: auto;
+			border: 1px solid #fff;
+			overflow: hidden;
+		}
+		.row {
+			display: flex;
+			flex-direction: row;
+			justify-content: center;
+	  		align-items: center;
+	  		margin: -1px;
+		}
+		.square {
+			width: 150px;
+			height: 150px;
+			border: 1px solid #999;
+			display: flex;
+			justify-content: center;
+	  		align-items: center;
+		}
+
+		.strike-thru {
+			/*display: none;*/
+			position: absolute;
+			width: 0;
+			height: 0;
+			background-color: #090;
+			left: 5%;
+			transition: width .5s;
+		}
+
+		.strike-thru.active{
+			/*display: block;*/
+			width: 800px;
+			height: 3px;
+		}
+		
+		.strike-thru.r0 {
+			top: 16%;
+		}
+		.strike-thru.r1 {
+			top: 50%;
+		}
+		.strike-thru.r2 {
+			top: 84%;
+		}
+		.strike-thru.col{
+			top: 5%;
+			transform: rotate(90deg);
+			transform-origin: top left;
+		}
+		.strike-thru.c0 {
+			left: 17%;
+		}
+		.strike-thru.c1 {
+			left: 50%;
+		}
+		.strike-thru.c2 {
+			left: 84%;
+		}
+
+		.strike-thru.diag-l{
+			transform: rotate(45deg);
+			transform-origin: top left;
+			left: 5%;
+			top: 5%;
+			/*width: 780px;*/
+		}
+		.strike-thru.diag-r{
+			transform: rotate(-45deg);
+			transform-origin: top right;
+			top: 5%;
+			left: auto;
+			right: 5%;
+			/*width: 780px;*/
+		}
+
+		.notice{
+			position: absolute;
+			font-size: 35px;
+			text-align: center;
+			top: 50%;
+			margin-top: -60px;
+			left: 0;
+			height: 0;
+			width: 0;
+			overflow: hidden;
+			background: rgba(0, 210, 0, .85);
+			transition: height 1s, width 1s;
+		}
+		.notice.active{
+			height: 120px;
+			width: 100%;
+		}
+		.play-again{
+			font-size: 20px;
+			width: 150px;
+			margin: 10px auto;
+			color: #fff;
+			background-color: blueviolet;
+			text-align: center;
+			padding: 15px;
+			border: 1px solid #0f0;
+			border-radius: 5px;
+			cursor: pointer;
+		}		
+
+	</style>
+</head>
+<body>
+	<h1>Tic Tac Toe</h1>
+	
+	<div class="board">
+
+		<div class="row">
+			<div class="square" data-loc="0-0"></div>
+			<div class="square" data-loc="0-1"></div>
+			<div class="square" data-loc="0-2"></div>
+		</div>
+		
+		<div class="row">
+			<div class="square" data-loc="1-0"></div>
+			<div class="square" data-loc="1-1"></div>
+			<div class="square" data-loc="1-2"></div>
+		</div>
+
+		<div class="row">
+			<div class="square" data-loc="2-0"></div>
+			<div class="square" data-loc="2-1"></div>
+			<div class="square" data-loc="2-2"></div>
+		</div>
+
+		<div class="strike-thru"></div>
+
+		<div class="notice">
+			<div class="message"></div>
+			<div class="play-again">Play Again</div>	
+		</div>
+
+	</div>
+
+
+
+<script>
+
+	var ticTacToe = {
+		init: function(){
+			this.size = 3;
+			this.moves = 0;
+			this.p1 = true; // player 1 goes first
+			this.gameOver = false;
+			this.board = [ [], [], [] ];
+			this.squares = Array.from(document.querySelectorAll('.board .row .square'));
+			this.strikeThru = document.querySelector('.board .strike-thru');
+			this.notice = document.querySelector('.board .notice'),
+			this.addListeners();		
+		},
+
+		addListeners: function(){
+			
+			var	self = this,
+				target,
+				content,
+				loc;
+
+			document.addEventListener('click', function(e){
+				target = e.target;
+
+				// handle click on empty square
+				if(target.classList.contains('square') && ! target.textContent && ! self.gameOver){
+					self.moves++;
+					target.textContent = self.p1 ? 'X' : 'O';
+					loc = target.getAttribute('data-loc').split('-');
+
+					self.board[parseInt(loc[0])][parseInt(loc[1])] = self.p1;
+
+					if(self.moves > 4 && self.checkWin(loc)){
+						// winner
+						self.endGame();
+					} else if(self.moves === self.size * self.size){
+						// tie game
+						self.endGame('tie');
+					} else {
+						// next player's turn
+						self.p1 = !self.p1;
+					}	
+
+				}
+
+				// handle click on 'Play Again' button
+				if(target.classList.contains('play-again')){
+					self.clearBoard();
+					self.init();
+				}
+
+			});
+		},
+
+		checkWin: function(loc){
+			var row = parseInt(loc[0]),
+				col = parseInt(loc[1]),
+				colWin = true,
+				rowWin = true,
+				size = this.size,
+				board = this.board,
+				p1 = this.p1;
+
+			// check for win in column or row
+			for(var i = 0; i < size; i++){
+				if (board[i][col] !== p1){
+					colWin = false;
+				}
+
+				if (board[row][i] !== p1){
+					rowWin = false;
+				}
+
+			}
+
+
+			if(rowWin){
+				this.strikeThru.classList.add('active', 'r' + loc[0]);
+				return true;
+			}
+
+			if(colWin){
+				this.strikeThru.classList.add('active', 'col', 'c' + loc[1]);
+				return true;
+			}
+				
+			// check diagonal win from top left to bottom right
+			if(board[0][0] === p1 && board[1][1] === p1 && board[2][2] === p1){
+				this.strikeThru.classList.add('active', 'diag-l');
+				return true;
+			}
+
+			// check diagonal win from top right to bottom left
+			if(board[0][2] === p1 && board[1][1] === p1 && board[2][0] === p1){
+				this.strikeThru.classList.add('active', 'diag-r');
+				return true;
+			}
+
+			return false;
+
+		},
+
+
+		endGame: function(msg){
+
+			var messageContainer = document.querySelector('.notice .message')
+				winner = this.p1 ? "1" : "2",
+				message = msg === 'tie' ? 'Tie Game' : `Player ${winner} Wins!`;
+
+			this.gameOver = true;
+			
+			// add message to notice
+			messageContainer.textContent = message;
+			this.notice.classList.add('active');
+
+		},
+
+		clearBoard: function(){
+			// remove Xs and Os
+			this.squares.forEach(function(sqr){
+				sqr.textContent = '';
+			});
+
+			// reset strike-thru
+			this.strikeThru.className = "strike-thru";
+
+			// hide notice
+			this.notice.classList.remove('active');
+
+		}
+	}
+
+	ticTacToe.init();
+	
+</script>
+</body>
+</html>

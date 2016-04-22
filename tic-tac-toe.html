@@ -5,14 +5,13 @@
 	<style>
 		h1{
 			text-align: center;
-			margin-bottom: 30px;
 		}
 		.board{
 			position: relative;
 			width: 450px;
 			height: 450px;
 			font-size: 50px;
-			margin: auto;
+			margin: 30px auto;
 			border: 1px solid #fff;
 			overflow: hidden;
 		}
@@ -37,7 +36,8 @@
 			width: 0;
 			height: 0;
 			background-color: #090;
-			left: 5%;
+			top: 0;
+			left: 0;
 			transition: width .5s;
 		}
 
@@ -56,7 +56,6 @@
 			top: 84%;
 		}
 		.strike-thru.col{
-			top: 5%;
 			transform: rotate(90deg);
 			transform-origin: top left;
 		}
@@ -73,15 +72,12 @@
 		.strike-thru.diag-l{
 			transform: rotate(45deg);
 			transform-origin: top left;
-			left: 5%;
-			top: 5%;
 		}
 		.strike-thru.diag-r{
 			transform: rotate(-45deg);
 			transform-origin: top right;
-			top: 5%;
 			left: auto;
-			right: 5%;
+			right: 0;
 		}
 
 		.notice{
@@ -112,12 +108,47 @@
 			border: 1px solid #0f0;
 			border-radius: 5px;
 			cursor: pointer;
+		}
+
+		.instructions{
+			left: 0;
+			text-align: center;
+			font-size: 30px;
+			color: #999;
+
+		}
+		.indicator{
+			position: absolute;
+			top: 5px;
+			left: 0;
+			padding: 0 20px;
+			font-size: 20px;
+			color: #999;
+			text-indent: 0;
+			list-style: none;
+
+		}
+		.indicator .arrow{
+			position: absolute;
+			right: -5px;
+			top: 0;
+			color: #000;
+			transition: top .5s;
+		}
+		.indicator .arrow.p2{
+			top: 22px;
 		}		
 
 	</style>
 </head>
 <body>
 	<h1>Tic Tac Toe</h1>
+
+	<ul class="indicator">
+		<li>Player 1</li>
+		<li>Player 2</li>
+		<li class="arrow">&larr;</li>
+	</ul>
 	
 	<div class="board">
 
@@ -147,6 +178,8 @@
 		</div>
 
 	</div>
+	<div class="instructions">Click a square to begin</div>
+
 
 
 
@@ -161,7 +194,8 @@
 			this.board = [ [], [], [] ];
 			this.squares = Array.from(document.querySelectorAll('.board .row .square'));
 			this.strikeThru = document.querySelector('.board .strike-thru');
-			this.notice = document.querySelector('.board .notice'),
+			this.notice = document.querySelector('.board .notice');
+			this.arrow = document.querySelector('.indicator .arrow');
 			this.addListeners();		
 		},
 
@@ -192,13 +226,14 @@
 					} else {
 						// next player's turn
 						self.p1 = !self.p1;
+						self.arrow.classList.toggle('p2');
 					}	
 
 				}
 
 				// handle click on 'Play Again' button
 				if(target.classList.contains('play-again')){
-					self.clearBoard();
+					self.resetBoard();
 					self.init();
 				}
 
@@ -268,7 +303,7 @@
 
 		},
 
-		clearBoard: function(){
+		resetBoard: function(){
 			// remove Xs and Os
 			this.squares.forEach(function(sqr){
 				sqr.textContent = '';
@@ -279,6 +314,9 @@
 
 			// hide notice
 			this.notice.classList.remove('active');
+
+			// reset player indicator
+			this.arrow.classList.remove('p2');
 
 		}
 	}
